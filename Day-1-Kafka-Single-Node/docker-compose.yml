@@ -1,11 +1,11 @@
 version: '3'
 services:
   zookeeper:
-    image: zookeeper:3.6.3
+    image:  mudassirq692/zookeeper:3.6.3
     ports:
       - "2181:2181"
   kafka:
-    image: wurstmeister/kafka:2.13-2.7.0
+    image: mudassirq692/kafka:2.13-2.7.0
     ports:
       - "9092:9092"
     environment:
