@@ -1,0 +1,81 @@
+pipeline {
+    agent any
+
+    environment {
+        ZOOKEEPER_IMAGE = 'zookeeper'
+        ZOOKEEPER_TAG = '3.6.3'
+        KAFKA_IMAGE = 'kafka'
+        KAFKA_TAG = '2.13-2.7.0'
+        GCP_PROJECT = 'lustrous-drake-412814'
+        GKE_CLUSTER = 'kafka-dev'
+        GKE_ZONE = 'us-central1-c'
+        KAFKA_TOPIC = 'csv-files-topic' // Define Kafka topic for the CSV data
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git credentialsId: 'github-credentials-id', url: 'https://github.com/mudassiruddin-qazi/kafka-course.git', branch: 'main'
+            }
+        }
+
+        stage('GKE Authentication') {
+            steps {
+                withCredentials([file(credentialsId: 'gcp-service-account-key', variable: 'GCP_KEY')]) {
+                    sh '''
+                        gcloud auth activate-service-account --key-file=$GCP_KEY
+                        gcloud container clusters get-credentials kafka-dev --zone us-central1-c --project lustrous-drake-412814
+                    '''
+                }
+            }
+        }
+
+        stage('Produce CSV to Kafka') {
+            steps {
+                script {
+                    // Get the Kafka pod name dynamically
+                    def kafkaPodName = sh(script: "kubectl get pods -l app=kafka -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
+                    echo "Kafka pod name: ${kafkaPodName}"
+
+                    // Copy CSV files into the pod
+                    sh """
+                        kubectl cp kafka-course/Day-1-Kafka-Single-Node/sample1.csv ${kafkaPodName}:/tmp/sample1.csv
+                        kubectl cp kafka-course/Day-1-Kafka-Single-Node/sample2.csv ${kafkaPodName}:/tmp/sample2.csv
+                    """
+
+                    // Produce the CSV files to Kafka
+                    sh """
+                        kubectl exec ${kafkaPodName} -- bash -c "cat /tmp/sample1.csv | kafka-console-producer.sh --broker-list localhost:9092 --topic ${KAFKA_TOPIC}"
+                        kubectl exec ${kafkaPodName} -- bash -c "cat /tmp/sample2.csv | kafka-console-producer.sh --broker-list localhost:9092 --topic ${KAFKA_TOPIC}"
+                    """
+                }
+            }
+        }
+
+        stage('Consume from Kafka') {
+            steps {
+                script {
+                    // Get the Kafka pod name dynamically
+                    def kafkaPodName = sh(script: "kubectl get pods -l app=kafka -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
+                    echo "Kafka pod name: ${kafkaPodName}"
+
+                    // Consume messages from Kafka topic and capture the output
+                    def consumedMessages = sh(script: """
+                        kubectl exec ${kafkaPodName} -- kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ${KAFKA_TOPIC} --from-beginning --max-messages 10
+                    """, returnStdout: true).trim()
+
+                    // Print the consumed messages in the Jenkins log
+                    echo "Consumed messages from Kafka topic ${KAFKA_TOPIC}:"
+                    echo "${consumedMessages}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up (optional)
+            echo "Pipeline execution completed."
+        }
+    }
+}
