@@ -16,6 +16,9 @@ gcloud projects add-iam-policy-binding lustrous-drake-412814 \
 gcloud projects add-iam-policy-binding lustrous-drake-412814 \
   --member="serviceAccount:gcp-pubsub-gcs@lustrous-drake-412814.iam.gserviceaccount.com" \
   --role="roles/storage.objectAdmin"
+gcloud projects add-iam-policy-binding lustrous-drake-412814 \
+  --member="serviceAccount:gcp-pubsub-gcs@lustrous-drake-412814.iam.gserviceaccount.com" \
+  --role="roles/pubsub.publisher"
 gcloud iam service-accounts keys create ~/gcp-key.json \
   --iam-account=gcp-pubsub-gcs@lustrous-drake-412814.iam.gserviceaccount.com
 export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-key.json
