@@ -1,6 +1,7 @@
 gcloud services enable bigquery.googleapis.com
 gcloud services enable storage.googleapis.com
 ======================================================
+bq --location=us-central1 mk --dataset lustrous-drake-412814:student_dataset
 Go to: https://console.cloud.google.com/bigquery
 Click on your project → student_dataset → student_table
 SELECT * FROM `lustrous-drake-412814.student_dataset.student_table` LIMIT 10;
