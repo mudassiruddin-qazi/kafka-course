@@ -1,0 +1,11 @@
+[
+  { "name": "id", "type": "STRING" },
+  { "name": "name", "type": "STRING" },
+  { "name": "age", "type": "INTEGER" },
+  { "name": "class", "type": "STRING" },
+  { "name": "score_math", "type": "INTEGER" },
+  { "name": "score_science", "type": "INTEGER" },
+  { "name": "score_english", "type": "INTEGER" },
+  { "name": "address_city", "type": "STRING" },
+  { "name": "address_pincode", "type": "INTEGER" }
+]
