@@ -18,3 +18,8 @@ Traceback (most recent call last):
 -----------------------------Error-----------------
 sudo mkdir -p /data/semi-structure
 sudo chown $USER:$USER /data/semi-structure
+
+===========================For Stucture Data==================
+sudo nano generate_structured_data.py
+sudo mkdir -p /data/structure
+sudo chown $USER:$USER /data/structure
