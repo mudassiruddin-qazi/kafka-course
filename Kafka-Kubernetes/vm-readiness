@@ -1,0 +1,33 @@
+wget https://archive.apache.org/dist/kafka/3.6.1/kafka_2.13-3.6.1.tgz
+tar -xzf kafka_2.13-3.6.1.tgz
+cd kafka_2.13-3.6.1
+export KAFKA_HOME=~/kafka_2.13-3.6.1
+export PATH=$PATH:$KAFKA_HOME/bin
+source ~/.bashrc
+# or
+source ~/.zshrc
+-------------------------------------------------
+sudo apt update
+sudo apt install default-jdk -y
+sudo yum install java-11-openjdk-devel -y
+export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+java -version
+--------------------------
+kafka-topics.sh --version
+kafka-topics.sh \
+  --create \
+  --topic sale-data \
+  --bootstrap-server 34.10.5.194:9092 \
+  --replication-factor 1 \
+  --partitions 1
+
+kafka-topics.sh --list --bootstrap-server 34.10.5.194:9092
+
+cat /data/sale-data/sales_data_1.csv | kafka-console-producer.sh \
+  --broker-list 34.10.5.194:9092 \
+  --topic sale-data
+
+for file in /data/sale-data/*.csv; do
+  echo "Pushing $file"
+  cat "$file" | kafka-console-producer.sh --broker-list 34.10.5.194:9092 --topic sale-data
+done
