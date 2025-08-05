@@ -1,3 +1,24 @@
+sudo apt update
+sudo apt install python3-pip -y
+pip3 install faker
+sudo apt update
+sudo apt install python3.11-venv -y
+# Step 1: Create virtual environment
+python3 -m venv venv
+
+# Step 2: Activate it
+source venv/bin/activate
+
+# Step 3: Install faker
+pip install faker
+
+# Step 4: Run your script
+python3 generate_ecom_data.py
+------
+sudo mkdir -p /data/sale-data
+sudo chown $USER:$USER /data/sale-data
+
+-------------------
 wget https://archive.apache.org/dist/kafka/3.6.1/kafka_2.13-3.6.1.tgz
 tar -xzf kafka_2.13-3.6.1.tgz
 cd kafka_2.13-3.6.1
