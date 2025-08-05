@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+spec:
+  selector:
+    app: zookeeper
+  ports:
+    - port: 2181
+      targetPort: 2181
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: mudassirq692/zookeeper:3.6.3
+          ports:
+            - containerPort: 2181
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+spec:
+  type: LoadBalancer
+  selector:
+    app: kafka
+  ports:
+    - port: 9092
+      targetPort: 9092
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: mudassirq692/kafka:2.13-2.7.0
+          ports:
+            - containerPort: 9092
+          command:
+            - /bin/sh
+            - -c
+            - |
+              export POD_IP=$(hostname -i) && \
+              echo "broker.id=1" > /opt/kafka/config/server.properties && \
+              echo "listeners=PLAINTEXT://0.0.0.0:9092" >> /opt/kafka/config/server.properties && \
+              echo "advertised.listeners=PLAINTEXT://${POD_IP}:9092" >> /opt/kafka/config/server.properties && \
+              echo "zookeeper.connect=zookeeper:2181" >> /opt/kafka/config/server.properties && \
+              echo "log.dirs=/tmp/kafka-logs" >> /opt/kafka/config/server.properties && \
+              /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
